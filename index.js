@@ -1,18 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require('dotenv').config()
 const app = express();
-const port = 3002;
+const port = process.env.PORT || 3002;
 
 // middleware
 app.use(express.json());
 app.use(cors());
 
-// 8KddRYXCCXpj5fsm
-// book-haven-server
 
 const uri =
-  "mongodb+srv://book-haven-server:8KddRYXCCXpj5fsm@cluster0.03r3dfs.mongodb.net/?appName=Cluster0";
+  `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.03r3dfs.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -38,6 +37,8 @@ async function run() {
         const result=await booksColl.insertOne(newBook)
         res.send(result)
     })
+
+   
 
     // get all books api 
     app.get('/all-books', async(req,res)=>{
