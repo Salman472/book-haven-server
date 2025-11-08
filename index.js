@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = 3002;
 
@@ -39,18 +39,48 @@ async function run() {
         res.send(result)
     })
 
-    // get all the books
+    // get all books api 
     app.get('/all-books', async(req,res)=>{
+        const cursor= booksColl.find()
+        const result=await cursor.toArray()
+        res.send(result)
+    })
+
+    // get my books api
+    app.get('/my-books', async(req,res)=>{
         const email=req.query.email
         const query={}
         if(email){
             query.userEmail=email
         }
-        
         const cursor= booksColl.find(query)
         const result=await cursor.toArray()
         res.send(result)
     })
+
+    // update book api
+    app.patch('/my-books/:id', async(req,res)=>{
+        const id=req.params.id
+        const updateBook=req.body
+        const query={_id: new ObjectId(id)}
+        const update={
+            $set:{
+                title:updateBook.title,
+                author:updateBook.author,
+                genre:updateBook.genre,
+                rating:updateBook.rating,
+                summary:updateBook.summary,
+                coverImage:updateBook.coverImage
+            }
+
+        }
+        const result=await booksColl.updateOne(query,update)
+        res.send(result)
+    })
+
+    
+    // Users can Update their own books (title, author, genre, rating, summary, coverImage
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
