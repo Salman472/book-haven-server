@@ -38,7 +38,14 @@ async function run() {
         res.send(result)
     })
 
-   
+    // get latest books api
+    app.get('/latest-books', async(req,res)=>{
+        const sortByRating={rating:-1}
+        const fieldReturn={_id:0,title:1,author:1,genre:1,rating:1,coverImage:1}
+        const cursor= booksColl.find().limit(6).sort(sortByRating).project(fieldReturn)
+        const result=await cursor.toArray()
+        res.send(result)
+    })
 
     // get all books api 
     app.get('/all-books', async(req,res)=>{
