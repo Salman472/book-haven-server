@@ -39,6 +39,19 @@ async function run() {
         res.send(result)
     })
 
+    // get all the books
+    app.get('/all-books', async(req,res)=>{
+        const email=req.query.email
+        const query={}
+        if(email){
+            query.userEmail=email
+        }
+        
+        const cursor= booksColl.find(query)
+        const result=await cursor.toArray()
+        res.send(result)
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
