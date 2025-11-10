@@ -30,6 +30,7 @@ async function run() {
     // create a database for my project name the book haven
     const booksDB = client.db("booksDB");
     const booksColl = booksDB.collection("books");
+    const commentsColl=booksDB.collection('comments')
 
     // create or add book
     app.post('/add-book', async(req,res)=>{
@@ -38,10 +39,27 @@ async function run() {
         res.send(result)
     })
 
+    // new comment
+    app.post('/new-comment',async(req,res)=>{
+      const newComment=req.body
+      const result=await commentsColl.insertOne(newComment)
+      res.send(result)
+    })
+
+    // get new comment
+    app.get('/new-comment', async(req,res)=>{
+      // const id=req.params.id
+      // const query={_id:new ObjectId(id)}
+      const cursor=commentsColl.find().sort({_id:-1})
+      const result=await cursor.toArray()
+      res.send(result)
+      console.log(result);
+    })
+
     // get latest books api
     app.get('/latest-books', async(req,res)=>{
         // const sortByRating={rating:-1}
-        const fieldReturn={_id:0,title:1,author:1,genre:1,rating:1,coverImage:1}
+        const fieldReturn={title:1,author:1,genre:1,rating:1,coverImage:1}
         const cursor= booksColl.find().limit(6).sort({_id:-1}).project(fieldReturn)
         const result=await cursor.toArray()
         res.send(result)
@@ -49,7 +67,7 @@ async function run() {
     // get latest books api
     app.get('/top-rating', async(req,res)=>{
         const sortByRating={rating:-1}
-        const fieldReturn={_id:0,title:1,author:1,genre:1,rating:1,coverImage:1}
+        const fieldReturn={title:1,author:1,genre:1,rating:1,coverImage:1}
         const cursor= booksColl.find().limit(6).sort(sortByRating).project(fieldReturn)
         const result=await cursor.toArray()
         res.send(result)
@@ -60,6 +78,13 @@ async function run() {
         const cursor= booksColl.find()
         const result=await cursor.toArray()
         res.send(result)
+    })
+    // get single book api
+    app.get('/book-details/:id', async(req,res)=>{
+      const id=req.params.id
+      const query={_id:new ObjectId(id)}
+      const result=await booksColl.findOne(query)
+      res.send(result)
     })
 
     // get my books api
