@@ -40,6 +40,14 @@ async function run() {
 
     // get latest books api
     app.get('/latest-books', async(req,res)=>{
+        // const sortByRating={rating:-1}
+        const fieldReturn={_id:0,title:1,author:1,genre:1,rating:1,coverImage:1}
+        const cursor= booksColl.find().limit(6).sort({_id:-1}).project(fieldReturn)
+        const result=await cursor.toArray()
+        res.send(result)
+    })
+    // get latest books api
+    app.get('/top-rating', async(req,res)=>{
         const sortByRating={rating:-1}
         const fieldReturn={_id:0,title:1,author:1,genre:1,rating:1,coverImage:1}
         const cursor= booksColl.find().limit(6).sort(sortByRating).project(fieldReturn)
