@@ -29,9 +29,28 @@ async function run() {
 
     // create a database for my project name the book haven
     const booksDB = client.db("booksDB");
+    const usersColl=booksDB.collection("users")
+
     const booksColl = booksDB.collection("books");
     const commentsColl=booksDB.collection('comments')
 
+    
+
+    // create user and store in DB
+    app.post('/users',async(req,res)=>{
+      const newUser=req.body
+      const email=req.body.email
+      const query={email:email}
+      const exitingUser=await usersColl.findOne(query)
+      if(exitingUser){
+        res.send('User Already Exits')
+      }
+      else{
+        const result = await usersColl.insertOne(newUser)
+      res.send(result)
+      }
+      
+    })
     // create or add book
     app.post('/add-book', async(req,res)=>{
         const newBook=req.body
@@ -46,15 +65,22 @@ async function run() {
       res.send(result)
     })
 
-    // get new comment
-    app.get('/new-comment', async(req,res)=>{
-      // const id=req.params.id
-      // const query={_id:new ObjectId(id)}
-      const cursor=commentsColl.find().sort({_id:-1})
+   
+    app.get('/all-books/new-comment/:id', async(req,res)=>{
+     const id=req.params.id
+     const query={bookId:id}
+      const cursor=commentsColl.find(query).sort({_id:-1})
       const result=await cursor.toArray()
       res.send(result)
       console.log(result);
     })
+    // app.get('/new-comment', async(req,res)=>{
+     
+    //   const cursor=commentsColl.find().sort({_id:-1})
+    //   const result=await cursor.toArray()
+    //   res.send(result)
+    //   console.log(result);
+    // })
 
     // get latest books api
     app.get('/latest-books', async(req,res)=>{
@@ -64,11 +90,11 @@ async function run() {
         const result=await cursor.toArray()
         res.send(result)
     })
-    // get latest books api
+    // get top rating books api
     app.get('/top-rating', async(req,res)=>{
-        const sortByRating={rating:-1}
+        
         const fieldReturn={title:1,author:1,genre:1,rating:1,coverImage:1}
-        const cursor= booksColl.find().limit(6).sort(sortByRating).project(fieldReturn)
+        const cursor= booksColl.find().limit(5).sort({rating:-1}).project(fieldReturn)
         const result=await cursor.toArray()
         res.send(result)
     })
@@ -80,7 +106,7 @@ async function run() {
         res.send(result)
     })
     // get single book api
-    app.get('/book-details/:id', async(req,res)=>{
+    app.get('/all-books/:id', async(req,res)=>{
       const id=req.params.id
       const query={_id:new ObjectId(id)}
       const result=await booksColl.findOne(query)
@@ -92,7 +118,7 @@ async function run() {
         const email=req.query.email
         const query={}
         if(email){
-            query.userEmail=email
+            query.email=email
         }
         const cursor= booksColl.find(query)
         const result=await cursor.toArray()
